@@ -1,148 +1,157 @@
-codigo	->	lista_sentencias
+Codigo -> Lista_Sentencias
 
-lista_sentencias 	->	lista_sentencias_basicas lista_sentencias
-					|	lista_sentencias_pro lista_sentencias
+Lista_Sentencias -> Sentencia Lista_Sentencias
+				 | Epsilon
+
+Sentencia -> Sentencia_Basica
+		  |  Sentencia_Declarativa
+		  
+Sentencia_Declarativa -> Sentencia_Struct
+					  |	 Sentencia_Enum
+					  |	 Sentencia_Funcion
+					  
+Sentencia_Basica -> Selection_Sentence
+				 |	Loop_Sentence
+				 |	Jump_Sentence
+				 |	Expression_Sentence
+				 |	;
+				 
+Expression_Sentence -> 	Expression
 					|	Epsilon
+				 
+Loop_Sentence -> Sentencia_Basica_while
+			  |	 Sentencia_Basica_do_while
+			  |	 Sentencia_Basica_for
+				 
+Selection_Sentence -> 	Sentencia_Basica_if
+				   |	Sentencia_Basica_switch
+				 
+Jump_Sentence -> break ;
+			  |  return Expression_Sentence ;
+			  |  continue ;
+				 
+Lista_Sentencias_Basicas -> Sentencia_Basica Lista_Sentencias_Basicas
+						 | Epsilon
+						 
+						 
+Sentencia_Basica_if	-> if(Expression) Sentencia_Basica_if'
 
-lista_sentencias_basicas	->	sentencia_basica lista_sentencias_basicas
+Sentencia_Basica_if' -> Sentencia_Basica Sentencia_Basica_if''
+					 |  {Lista_Sentencias_Basicas} Sentencia_Basica_if''
 
-lista_sentencias_pro	->	sentencia_pro lista_sentencias_pro
+Sentencia_Basica_if'' -> else Sentencia_Basica_Single_Or_Block
+					  |  Epsilon
+		   
+Sentencia_Basica_Single_Or_Block -> Sentencia_Basica
+								 |  {Lista_Sentencias_Basicas}
+						
+Sentencia_Basica_while -> while(Expression) Sentencia_Basica_Single_Or_Block
 
-sentencia_pro 	->	sentencia_declaracion_struct
-				| 	sentencia_declaracion_funcion
-				|	sentencia_declaracion_enum
-				|	;
+Sentencia_Basica_do_while -> do Sentencia_Basica_Single_Or_Block while(Expression);
 
-sentencia_declaracion_enum	->	sentencia_declaracion_enum identificador {sentencia_declaracion_enum'} sentencia_declaracion_enum''
+Sentencia_Basica_for ->	for( conjunto_expresiones_for ) Sentencia_Basica_Single_Or_Block
 
-sentencia_declaracion_enum'	->	identificador sentencia_declaracion_enum'''
+conjunto_expresiones_for ->	Expression_Sentence;Expression_Sentence;Expression_Sentence
+						 |	sentencia_basica_decl_var : Identificador
 
-sentencia_declaracion_enum''	->	identificador ;
-								|	;
+Sentencia_Basica_switch	->	switch(expresion){Lista_Sentencias_Case}
 
-sentencia_declaracion_enum'''	->	= literal_int sentencia_declaracion_enum''''
-								|	sentencia_declaracion_enum''''
+Lista_Sentencias_Case -> Sentencia_Case Lista_Sentencias_Case
+						|  default: lista_sentencias_basicas
+						|  Epsilon
+						
+Sentencia_Case -> case Conditional_Expression: lista_sentencias_basicas
 
-sentencia_declaracion_enum''''	->	, sentencia_declaracion_enum'
-								|	Epsilon
+Expression ->	Assigment_Expression
+		   |	Expression , Assigment_Expression
+		   
+Assigment_Expression ->	Conditional_Expression
+					 |	Unary_Expression Assigment_Operator Assigment_Expression
+					 
+Assigment_Operator -> 	=
+				   |	*=
+				   |	/=
+				   |	%=
+				   |	+=
+				   |	-=
+				   |	<<=
+				   |	>>=
+				   |	&=
+				   |	^=
+				   |	|=
+				   
+Unary_Expression -> Postfix_Expression
+				 |	++Unary_Expression
+				 |	--Unary_Expression
+				 | Unary_Operator Unary_Expression
+				 
+Unary_Operator ->	&
+			   |	*
+			   |	+
+			   |	-
+			   |	~
+			   |	!
+				 
+Postfix_Expression -> 	Primary_Expression
+				   |	Postfix_Expression [ Expression ]
+				   |	Postfix_Expression ( Assigment_Expression_List )
+				   |	Postfix_Expression . Identificador
+				   |	Postfix_Expression -> Identificador
+				   |	Postfix_Expression ++
+				   |	Postfix_Expression --
+				   
+Assigment_Expression_List -> Assigment_Expression Assigment_Expression_List
+						  | Epsilon
+				   
+Primary_Expression -> 	Identificador
+				   |	Constant
+				   |	String
+				   |	( Expression )
+				   
+Constant -> Int_Constant
+		 |	Char_Constant
+		 |	Float_Constant
+		 |	Bool_Constant
+		 |	Enum_Constant
+				   
+Conditional_Expression -> 	Logical_Or_Expression
+					   |	Logical_Or_Expression ? Expression : Conditional_Expression
+					   
+Logical_Or_Expression ->	Logical_And_Expression
+					  |		Logical_Or_Expression || Logical_And_Expression
 
-sentencia_declaracion_funcion	->	Tipo_dato identificador (lista_parametros) {lista_sentencias_basicas return expresion;}
+Logical_And_Expression ->	Inclusive_Or_Expression
+					   |	Logical_And_Expression && Inclusive_Or_Expression
 
-lista_parametros	->	tipo_dato sentencia_basica_decl_var_pointer identificador lista_parametros'
+Inclusive_Or_Expression -> 	Exclusive_Or_Expression
+						|	Inclusive_Or_Expression | Exclusive_Or_Expression
 
-lista_parametros'	-> , lista_parametros
-					| Epsilon
-
-sentencia_declaracion_struct 	->	struct identificador {sentencia_declaracion_struct'} sentencia_declaracion_struct'';
-
-sentencia_declaracion_struct'	->	Tipo_dato sentencia_basica_decl_var_pointer identificador sentencia_declaracion_struct''' sentencia_declaracion_struct'
-					|	Epsilon
-
-sentencia_declaracion_struct''	->	identificador
-					|	Epsilon
-
-sentencia_declaracion_struct'''	->	[literal_int];
-					|	;
-
-sentencia_basica 	->	sentencia_basica_if
-			|	sentencia_basica_while
-			|	sentencia_basica_do
-			|	sentencia_basica_for
-			|	sentencia_basica_switch
-			|	sentencia_basica_foreach
-			|	sentencia_basica_asignaciones
-			|	sentencia_basica_break
-			|	sentencia_basica_continue
-			|	sentencia_basica_decl_var
-			|	sentencia_basica_invocar_struct
-			|	;
-
-sentencia_basica_if	->	if(condicion) sentencia_basica_if'
-
-sentencia_basica_if'	->	sentencia_basica sentencia_basica_if''
-				|	{lista_sentencias_basicas} sentencia_basica_if'''
-
-sentencia_basica_if''	->	else sentencia_basica
-				|	Epsilon
-
-sentencia_basica_if'''	->	else sentencia_basica_if''''
-				|	Epsilon
-
-sentencia_basica_if''''	->	{lista_sentencias_basicas}
-					|	sentencia_basica
-
-sentencia_basica_while	->	while(condicion) sentencia_basica_while'`
-
-sentencia_basica_while'	->	sentencia_basica
-					|	{lista_sentencias_basicas}
-
-sentencia_basica_do	->	do sentencia_basica_do' while(condicion);
-
-sentencia_basica_do'	->	sentencia_basica
-				|	{lista_sentencias_basicas}
-
-sentencia_basica_for	->	for( sentencia_basica_for'
-
-sentencia_basica_for'	->	expresion;expresion;expresion)sentencia_basica_for''
-				|	sentencia_basica_decl_var : coleccion) sentencia_basica_for''
-
-sentencia_basica_for''	->	sentencia_basica
-		|	{lista_sentencias_basicas}
-
-sentencia_basica_switch	->	switch(expresion){sentencia_basica_switch'}
-
-sentencia_basica_switch'	->	case expresion_constante: lista_sentencias_basicas sentencia_basica_switch'
-					|	default: lista_sentencias_basicas
-
-sentencia_basica_break	->	break;
-
-sentencia_basica_continue 	->	continue;
-
-sentencia_basica_decl_var 	->	Tipo_dato sentencia_basica_decl_var_pointer identificador sentencia_basica_decl_var'
-
-sentencia_basica_decl_var_pointer 	->	*sentencia_basica_decl_var_pointer
-							|	Epsilon
-
-sentencia_basica_decl_var'	->	[sentencia_basica_decl_var''
-					|	;
-					|	Operadores_assignacion expresion
-
-sentencia_basica_decl_var''	->	literal_int] lista_sentencias_basicas
-						|	] sentencia_basica_decl_var''' sentencia_basica_decl_var_initArray
-
-sentencia_basica_decl_var'''	->	[literal_int] sentencia_basica_decl_var'''
-						|	Epsilon
-
-sentencia_basica_decl_var_initArray 	->	= {lista_argumentos}
-
-lista_argumentos 	->	Argumento lista_argumentos'
-
-lista_argumentos'	->	lista_argumentos
-					|	,
-					|	Epsilon
-
-Argumento 	->	literal_int
-			|	literal_string
-			|	literal_char
-			|	literal_date
-			|	literal_float
-			|	literal_bool
-
-sentencia_basica_asignaciones 	->	identificador Operadores_assignacion expresion;
-
-sentencia_basica_invocar_struct	->	identificador sentencia_basica_invocar_struct' sentencia_basica
-
-sentencia_basica_invocar_struct'	->	-> identificador
-									|	. identificador
-
-
-
-pending:
-	condicion
-	expresion?
-	expresion_constante
-	Operadores
-	definir expresion
-	definir tipo_dato
-	invocacion de funcion en basicas
-	invocacion de enum en basicas
+Exclusive_Or_Expression -> And_Expression
+					    | Exclusive_Or_Expression ^ And_Expression
+						
+And_Expression ->	Equality_Expression
+			   |	And_Expression & Equality_Expression
+			   
+Equality_Expression ->	Relational_Expression
+					|	Equality_Expression == Relational_Expression
+					|	Equality_Expression != Relational_Expression
+					
+Relational_Expression ->	Shift_Expression
+					  |		Relational_Expression < Shift_Expression
+					  |		Relational_Expression > Shift_Expression
+					  |		Relational_Expression <= Shift_Expression
+					  |		Relational_Expression >= Shift_Expression
+					  
+Shift_Expression ->	Additive_Expression
+				 |	Shift_Expression << Additive_Expression
+				 |	Shift_Expression >> Additive_Expression
+				 
+Additive_Expression -> 	Multiplicative_Expression
+					|	Additive_Expression + Multiplicative_Expression
+					|	Additive_Expression - Multiplicative_Expression
+					
+Multiplicative_Expression -> 	Unary_Expression
+						  |		Multiplicative_Expression * Unary_Expression
+						  |		Multiplicative_Expression / Unary_Expression
+						  |		Multiplicative_Expression % Unary_Expression
+							
