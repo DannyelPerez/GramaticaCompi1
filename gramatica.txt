@@ -1,0 +1,148 @@
+codigo	->	lista_sentencias
+
+lista_sentencias 	->	lista_sentencias_basicas lista_sentencias
+					|	lista_sentencias_pro lista_sentencias
+					|	Epsilon
+
+lista_sentencias_basicas	->	sentencia_basica lista_sentencias_basicas
+
+lista_sentencias_pro	->	sentencia_pro lista_sentencias_pro
+
+sentencia_pro 	->	sentencia_declaracion_struct
+				| 	sentencia_declaracion_funcion
+				|	sentencia_declaracion_enum
+				|	;
+
+sentencia_declaracion_enum	->	sentencia_declaracion_enum identificador {sentencia_declaracion_enum'} sentencia_declaracion_enum''
+
+sentencia_declaracion_enum'	->	identificador sentencia_declaracion_enum'''
+
+sentencia_declaracion_enum''	->	identificador ;
+								|	;
+
+sentencia_declaracion_enum'''	->	= literal_int sentencia_declaracion_enum''''
+								|	sentencia_declaracion_enum''''
+
+sentencia_declaracion_enum''''	->	, sentencia_declaracion_enum'
+								|	Epsilon
+
+sentencia_declaracion_funcion	->	Tipo_dato identificador (lista_parametros) {lista_sentencias_basicas return expresion;}
+
+lista_parametros	->	tipo_dato sentencia_basica_decl_var_pointer identificador lista_parametros'
+
+lista_parametros'	-> , lista_parametros
+					| Epsilon
+
+sentencia_declaracion_struct 	->	struct identificador {sentencia_declaracion_struct'} sentencia_declaracion_struct'';
+
+sentencia_declaracion_struct'	->	Tipo_dato sentencia_basica_decl_var_pointer identificador sentencia_declaracion_struct''' sentencia_declaracion_struct'
+					|	Epsilon
+
+sentencia_declaracion_struct''	->	identificador
+					|	Epsilon
+
+sentencia_declaracion_struct'''	->	[literal_int];
+					|	;
+
+sentencia_basica 	->	sentencia_basica_if
+			|	sentencia_basica_while
+			|	sentencia_basica_do
+			|	sentencia_basica_for
+			|	sentencia_basica_switch
+			|	sentencia_basica_foreach
+			|	sentencia_basica_asignaciones
+			|	sentencia_basica_break
+			|	sentencia_basica_continue
+			|	sentencia_basica_decl_var
+			|	sentencia_basica_invocar_struct
+			|	;
+
+sentencia_basica_if	->	if(condicion) sentencia_basica_if'
+
+sentencia_basica_if'	->	sentencia_basica sentencia_basica_if''
+				|	{lista_sentencias_basicas} sentencia_basica_if'''
+
+sentencia_basica_if''	->	else sentencia_basica
+				|	Epsilon
+
+sentencia_basica_if'''	->	else sentencia_basica_if''''
+				|	Epsilon
+
+sentencia_basica_if''''	->	{lista_sentencias_basicas}
+					|	sentencia_basica
+
+sentencia_basica_while	->	while(condicion) sentencia_basica_while'`
+
+sentencia_basica_while'	->	sentencia_basica
+					|	{lista_sentencias_basicas}
+
+sentencia_basica_do	->	do sentencia_basica_do' while(condicion);
+
+sentencia_basica_do'	->	sentencia_basica
+				|	{lista_sentencias_basicas}
+
+sentencia_basica_for	->	for( sentencia_basica_for'
+
+sentencia_basica_for'	->	expresion;expresion;expresion)sentencia_basica_for''
+				|	sentencia_basica_decl_var : coleccion) sentencia_basica_for''
+
+sentencia_basica_for''	->	sentencia_basica
+		|	{lista_sentencias_basicas}
+
+sentencia_basica_switch	->	switch(expresion){sentencia_basica_switch'}
+
+sentencia_basica_switch'	->	case expresion_constante: lista_sentencias_basicas sentencia_basica_switch'
+					|	default: lista_sentencias_basicas
+
+sentencia_basica_break	->	break;
+
+sentencia_basica_continue 	->	continue;
+
+sentencia_basica_decl_var 	->	Tipo_dato sentencia_basica_decl_var_pointer identificador sentencia_basica_decl_var'
+
+sentencia_basica_decl_var_pointer 	->	*sentencia_basica_decl_var_pointer
+							|	Epsilon
+
+sentencia_basica_decl_var'	->	[sentencia_basica_decl_var''
+					|	;
+					|	Operadores_assignacion expresion
+
+sentencia_basica_decl_var''	->	literal_int] lista_sentencias_basicas
+						|	] sentencia_basica_decl_var''' sentencia_basica_decl_var_initArray
+
+sentencia_basica_decl_var'''	->	[literal_int] sentencia_basica_decl_var'''
+						|	Epsilon
+
+sentencia_basica_decl_var_initArray 	->	= {lista_argumentos}
+
+lista_argumentos 	->	Argumento lista_argumentos'
+
+lista_argumentos'	->	lista_argumentos
+					|	,
+					|	Epsilon
+
+Argumento 	->	literal_int
+			|	literal_string
+			|	literal_char
+			|	literal_date
+			|	literal_float
+			|	literal_bool
+
+sentencia_basica_asignaciones 	->	identificador Operadores_assignacion expresion;
+
+sentencia_basica_invocar_struct	->	identificador sentencia_basica_invocar_struct' sentencia_basica
+
+sentencia_basica_invocar_struct'	->	-> identificador
+									|	. identificador
+
+
+
+pending:
+	condicion
+	expresion?
+	expresion_constante
+	Operadores
+	definir expresion
+	definir tipo_dato
+	invocacion de funcion en basicas
+	invocacion de enum en basicas
