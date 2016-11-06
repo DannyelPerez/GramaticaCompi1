@@ -1,72 +1,164 @@
-Codigo -> Lista_Sentencias
+//TODO: Agregar declarationList como parte de los statements
+// revisar constant-expression
+//assignment-expression
+//enum
+//struct
 
-Lista_Sentencias -> Sentencia Lista_Sentencias
-				 | Epsilon
+program -> statementList
 
-Sentencia -> Sentencia_Basica
-		  |  Sentencia_Declarativa
-		  
-Sentencia_Declarativa -> Sentencia_Struct
-					  |	 Sentencia_Enum
-					  |	 Sentencia_Funcion
+statementList -> statement statementList
+				| Epsilon
+				
+statement -> basicStatements
+			| declarativeStatements
+			
+basicStatements -> expressionStmt
+		  | compoundStmt
+		  | selectionStmt
+		  | IterationStmt
+		  | Jumpstmt
+		  | varDeclaration
+		  |	includeStmt
+
+includeStmt -> #include String_Constant
+
+declarativeStatements -> varDeclaration
+					| funDeclaration
+					| structDeclaration
+					| enumDeclaration
+			
+enumDeclaration -> enum { enumerators }
+
+enumerators -> enumerator
+             | Epsilon
+
+enumerator -> Id enumerator_assign
+
+enumerator_assign -> = literal enumerator_chain
+				   | enumerator_chain
+
+enumerator_chain -> , enumerator
+                  | Epsilon
+				  
+structDeclaration -> struct Id { structParams }
+
+structParams -> structParamsList
+		| Epsilon
+		
+structParamsList -> param structParamsList'
+
+structParamsList' -> ; structParamsList
+
+//int a,b,c;
+varDeclaration -> typeSpecifier const-list pointer-list varDeclList;
+			    | const-list typeSpecifier pointer-list varDeclList;
+
+
+varDeclList -> varDeclInitialize varDeclList'
+			
+varDeclList' -> , varDeclList
+			| Epsilon
+
+varDeclInitialize -> varDeclId isArray varDeclInitialize'
+
+varDeclInitialize' -> = assignment-expression
+					| { varDeclInitialize-list }
+					| { varDeclInitialize-list ,}
+					| Epsilon
+					
+varDeclInitialize-list -> varDeclInitialize varDeclInitialize-list'
+
+varDeclInitialize-list' -> , varDeclInitialize-list
+						| Epsilon
+					
+varDeclId -> Id varDeclId'
+
+varDeclId' -> [ NumConst ]
+			| Epsilon
+
+typeSpecifier -> Int
+			 |	Float
+			 | Bool
+			 | Char
+			 | Date
+			 | String
+			 | Void
+			 
+funDeclaration -> typeSpecifier Id ( params ) statement
+params -> paramsList
+		| Epsilon
+		
+paramsList -> param paramsList'
+
+paramsList' -> , paramsList
+
+param -> typeSpecifier const-list pointer-list Id isArray
+	  | const-list typeSpecifier pointer-list Id isArray
+
+isArray -> []
+		| Epsilon
+
+pointer-list -> * pointer-list
+			 | Epsilon
+
+const-list -> const const-list
+			| Epsilon
+
+
+expressionStmt -> expression ; 
+				| ;
+				
+compoundStmt -> { basicStatementsList }
+
+basicStatementsList -> basicStatements basicStatementsList
+					| Epsilon
+
+
+		  		
+labeledStmt -> case constant-expression : basicStatementsList
+            | default : basicStatementsList				 
+				 
+				 
+IterationStmt -> whileStmt
+			  | doWhileStmt
+			  |	forStmt
+				 
+selectionStmt -> ifStmt
+			  | switchStmt
+				 
+Jumpstmt -> break ;
+		| return expressionStmt ;
+		| continue ;
+				 					 	 
+ifStmt	-> if(expression) ifStmt'
+
+ifStmt' -> basicStatements ifStmt''
+
+ifStmt'' -> else basicStatements
+		| Epsilon
 					  
-Sentencia_Basica -> Selection_Sentence
-				 |	Loop_Sentence
-				 |	Jump_Sentence
-				 |	Expression_Sentence
-				 |	;
-				 
-Expression_Sentence -> 	Expression
-					|	Epsilon
-				 
-Loop_Sentence -> Sentencia_Basica_while
-			  |	 Sentencia_Basica_do_while
-			  |	 Sentencia_Basica_for
-				 
-Selection_Sentence -> 	Sentencia_Basica_if
-				   |	Sentencia_Basica_switch
-				 
-Jump_Sentence -> break ;
-			  |  return Expression_Sentence ;
-			  |  continue ;
-				 
-Lista_Sentencias_Basicas -> Sentencia_Basica Lista_Sentencias_Basicas
-						 | Epsilon
-						 
-						 
-Sentencia_Basica_if	-> if(Expression) Sentencia_Basica_if'
-
-Sentencia_Basica_if' -> Sentencia_Basica Sentencia_Basica_if''
-					 |  {Lista_Sentencias_Basicas} Sentencia_Basica_if''
-
-Sentencia_Basica_if'' -> else Sentencia_Basica_Single_Or_Block
-					  |  Epsilon
+switchStmt -> switch(expression) basicStatements
 		   
-Sentencia_Basica_Single_Or_Block -> Sentencia_Basica
-								 |  {Lista_Sentencias_Basicas}
-						
-Sentencia_Basica_while -> while(Expression) Sentencia_Basica_Single_Or_Block
+whileStmt -> while(expression) basicStatements
 
-Sentencia_Basica_do_while -> do Sentencia_Basica_Single_Or_Block while(Expression);
+doWhileStmt -> do basicStatements while(expression);
 
-Sentencia_Basica_for ->	for( conjunto_expresiones_for ) Sentencia_Basica_Single_Or_Block
+forStmt ->	for( forExpressionStmt ) basicStatements
 
-conjunto_expresiones_for ->	Expression_Sentence;Expression_Sentence;Expression_Sentence
-						 |	sentencia_basica_decl_var : Identificador
+forExpressionStmt -> expression ; expression ; expression
+				   | assignment-expression : Id
 
-Sentencia_Basica_switch	->	switch(expresion){Lista_Sentencias_Case}
 
-Lista_Sentencias_Case -> Sentencia_Case Lista_Sentencias_Case
-						|  default: lista_sentencias_basicas
-						|  Epsilon
-						
-Sentencia_Case -> case Conditional_Expression: lista_sentencias_basicas
 
-Expression ->	Assigment_Expression
-		   |	Expression , Assigment_Expression
+
+				   
+				   
+				   
+expression ->	assignment-expression
+		   |	expression , assignment-expression
 		   
-Assigment_Expression ->	Conditional_Expression
-					 |	Unary_Expression Assigment_Operator Assigment_Expression
+assignment-expression ->	Conditional_Expression
+					 |	Unary_Expression Assigment_Operator assignment-expression
 					 
 Assigment_Operator -> 	=
 				   |	*=
@@ -93,29 +185,30 @@ Unary_Operator ->	&
 			   |	!
 				 
 Postfix_Expression -> 	Primary_Expression
-				   |	Postfix_Expression [ Expression ]
-				   |	Postfix_Expression ( Assigment_Expression_List )
-				   |	Postfix_Expression . Identificador
-				   |	Postfix_Expression -> Identificador
+				   |	Postfix_Expression [expression ]
+				   |	Postfix_Expression ( assignment-expression_List )
+				   |	Postfix_Expression . Id
+				   |	Postfix_Expression -> Id
 				   |	Postfix_Expression ++
 				   |	Postfix_Expression --
 				   
-Assigment_Expression_List -> Assigment_Expression Assigment_Expression_List
+assignment-expression_List -> assignment-expression assignment-expression_List
 						  | Epsilon
 				   
-Primary_Expression -> 	Identificador
-				   |	Constant
-				   |	String
-				   |	( Expression )
+Primary_Expression -> Id
+				   | Constant
+				   | ( expression )
 				   
 Constant -> Int_Constant
-		 |	Char_Constant
-		 |	Float_Constant
-		 |	Bool_Constant
-		 |	Enum_Constant
+		 | Char_Constant
+		 | Float_Constant
+		 | String_Constant
+		 | Date_Constant
+		 | true
+		 | false
 				   
 Conditional_Expression -> 	Logical_Or_Expression
-					   |	Logical_Or_Expression ? Expression : Conditional_Expression
+					   |	Logical_Or_Expression ?expression : Conditional_Expression
 					   
 Logical_Or_Expression ->	Logical_And_Expression
 					  |		Logical_Or_Expression || Logical_And_Expression
@@ -154,4 +247,3 @@ Multiplicative_Expression -> 	Unary_Expression
 						  |		Multiplicative_Expression * Unary_Expression
 						  |		Multiplicative_Expression / Unary_Expression
 						  |		Multiplicative_Expression % Unary_Expression
-							
